@@ -26,6 +26,31 @@ export default function HomeScreen(props) {
       }
   },[params.languageTo, params.languageFrom])
 
+  const onSubmit = useCallback(async () => {
+    const axios = require('axios');
+
+      const options = {
+        method: 'GET',
+        url: 'https://nlp-translation.p.rapidapi.com/v1/translate',
+        params: {
+          text: 'Hello, world!!',
+          to: 'es',
+          from: 'en'
+        },
+        headers: {
+          'X-RapidAPI-Key': '03de0ab9a7mshd03b5fe6f939620p1607e0jsn1b4d9e25296a',
+          'X-RapidAPI-Host': 'nlp-translation.p.rapidapi.com'
+        }
+      };
+
+      try {
+        const response = await axios.request(options);
+        console.log(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+  })
+
   return (
       <View style={styles.container}>
           <View style={styles.languageContainer}>
