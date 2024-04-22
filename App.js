@@ -14,6 +14,9 @@ import * as Font from 'expo-font';
 import colors from './utils/colors';
 import LanguageSelectScreen from './screens/LanguageSelectScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {Provider} from 'react-redux';
+import store from './store/store'
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -59,7 +62,7 @@ const TabNavigator = () => {
   )
 
 }
-//Part 15
+//Part 17
 
 export default function App() {
 
@@ -105,47 +108,49 @@ if (!appIsLoaded) {
 }
 
   return (
-    <NavigationContainer>
-        <View onLayout={onLayout} style={{ flex: 1 }}>
-          <Stack.Navigator
-          screenOptions={{
-            headerTitleStyle: {
-              fontFamily: 'medium',
-            },
-            headerStyle: {
-              backgroundColor: colors.primary
-            }
-          }}>
-            <Stack.Group>
-              <Stack.Screen
-                name="main"
-                component={TabNavigator}
-                options={{
-                  headerTitle: "Translate"
-                }}
-              />
-            </Stack.Group>
+    <Provider store={store}>
+      <NavigationContainer>
+          <View onLayout={onLayout} style={{ flex: 1 }}>
+            <Stack.Navigator
+            screenOptions={{
+              headerTitleStyle: {
+                fontFamily: 'medium',
+              },
+              headerStyle: {
+                backgroundColor: colors.primary
+              }
+            }}>
+              <Stack.Group>
+                <Stack.Screen
+                  name="main"
+                  component={TabNavigator}
+                  options={{
+                    headerTitle: "Translate"
+                  }}
+                />
+              </Stack.Group>
 
-            <Stack.Group
-              screenOptions={{
-                presentation: 'containedModal',
-                headerStyle: {
-                  
-                },
-                 headerTitleStyle: {
-                  color: colors.textColor,
-                  fontFamily: 'medium'
-                }
-              }}
-            >
-              <Stack.Screen
-                name="languageSelect"
-                component={LanguageSelectScreen}
-              />
-            </Stack.Group>
-          </Stack.Navigator>
-        </View>
+              <Stack.Group
+                screenOptions={{
+                  presentation: 'containedModal',
+                  headerStyle: {
+                    
+                  },
+                  headerTitleStyle: {
+                    color: colors.textColor,
+                    fontFamily: 'medium'
+                  }
+                }}
+              >
+                <Stack.Screen
+                  name="languageSelect"
+                  component={LanguageSelectScreen}
+                />
+              </Stack.Group>
+            </Stack.Navigator>
+          </View>
       </NavigationContainer>
+    </Provider>
   );
 }
 

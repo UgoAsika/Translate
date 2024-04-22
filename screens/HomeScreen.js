@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Button, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Text, View, Button, TouchableOpacity, TextInput, FlatList, ActivityIndicator} from 'react-native';
 import React from 'react';
 import { AntDesign } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
@@ -7,6 +7,10 @@ import colors from '../utils/colors';
 import { useState, useEffect, useCallback } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import supportedLanguages from '../utils/supportedLanguages';
+import axios from "axios";
+import { translate } from '../utils/translate';
+import * as Clipboard from 'expo-clipboard';
+import { useDispatch } from 'react-redux';
 
 
 export default function HomeScreen(props) {
@@ -14,7 +18,9 @@ export default function HomeScreen(props) {
   const [resultText, setResultText] = useState("");
   const [languageTo, setLanguageTo] = useState("fr");
   const [languageFrom, setLanguageFrom] = useState("en");
+  const [isLoading, setIsLoading] = useState(false);
   const params = props.route.params || {};
+  const dispatch = useDispatch();
 
   useEffect(()=>{
       if (params.languageTo) {
@@ -27,29 +33,31 @@ export default function HomeScreen(props) {
   },[params.languageTo, params.languageFrom])
 
   const onSubmit = useCallback(async () => {
-    const axios = require('axios');
-
-      const options = {
-        method: 'GET',
-        url: 'https://nlp-translation.p.rapidapi.com/v1/translate',
-        params: {
-          text: 'Hello, world!!',
-          to: 'es',
-          from: 'en'
-        },
-        headers: {
-          'X-RapidAPI-Key': '03de0ab9a7mshd03b5fe6f939620p1607e0jsn1b4d9e25296a',
-          'X-RapidAPI-Host': 'nlp-translation.p.rapidapi.com'
+    
+      try{
+        setIsLoading(true);
+        const result = await translate(enteredText, languageFrom, languageTo);
+        if (!result){
+          setResultText('')
+          return;
         }
-      };
+        //dispatch here
 
-      try {
-        const response = await axios.request(options);
-        console.log(response.data);
-      } catch (error) {
-        console.error(error);
+        const textResult = result.translated_text[result.to];
+        setResultText(textResult)
+      } catch (error){
+        console.log(error)
+      } finally{
+        setIsLoading(false)
       }
-  })
+      
+  }, [enteredText, languageFrom, languageTo]);
+
+  let copyToClipBoard = useCallback(async () => {
+    await Clipboard.setStringAsync(resultText);
+  },[resultText]);
+
+
 
   return (
       <View style={styles.container}>
@@ -78,11 +86,13 @@ export default function HomeScreen(props) {
                 onChangeText={(text) => setEnteredText(text)}
               />
               <TouchableOpacity
+                onPress={isLoading ? undefined : onSubmit}
                 style={styles.iconContainer}
                 disabled={enteredText === ""}
               >
+                {isLoading ?  <ActivityIndicator size={'small'} color={colors.primary}/> :
+                 <Foundation name="arrow-right" size={24} color={enteredText !== "" ? colors.primary: "grey"} />}
                 
-                <Foundation name="arrow-right" size={24} color={enteredText !== "" ? colors.primary: "grey"} />
               </TouchableOpacity>
 
           </View>
@@ -92,6 +102,7 @@ export default function HomeScreen(props) {
               <TouchableOpacity
                 style={styles.iconContainer}
                 disabled={resultText === ""}
+                onPress={copyToClipBoard}
               >
                 
                 <FontAwesome name="copy" size={24} color="black" />
